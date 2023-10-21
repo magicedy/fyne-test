@@ -86,8 +86,7 @@ jobs:
             -name calculator${{ matrix.target.ext }}
 
       - name: Upload Artifact
-        working-directory: calculator
         uses: actions/upload-artifact@v3
         with:
           name: Artifact-${{ matrix.target.ext }}
-          path: fyne-cross/dist/*
+          path: calculator/fyne-cross/dist/*
