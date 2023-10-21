@@ -72,6 +72,7 @@ jobs:
             ${{ matrix.target.os }} \
             ${{ matrix.target.args }} \
             -debug -no-cache \
+            -ldflags "-s -w" \
             -name calculator${{ matrix.target.ext }}
 
       - name: Upload Artifact
