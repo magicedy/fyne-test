@@ -13,13 +13,11 @@ jobs:
       fail-fast: false
       matrix:
         # use max/min supported Go versions
-        go-version: ["1.21.x"]
+#        go-version: ["1.21.x"]
         target:
           - os: linux
-            args: -arch amd64
           - os: windows
             ext: .exe
-            args: -arch amd64
 #          - os: freebsd
           - os: android
             args: |
@@ -38,7 +36,7 @@ jobs:
         id: setup-go
         uses: actions/setup-go@v3
         with:
-          go-version: ${{ matrix.go-version }}
+          go-version: "1.21"
 
       - name: Checkout code
         uses: actions/checkout@v2
@@ -72,7 +70,6 @@ jobs:
             ${{ matrix.target.os }} \
             ${{ matrix.target.args }} \
             -debug -no-cache \
-            -ldflags "-s -w" \
             -name calculator${{ matrix.target.ext }}
 
       - name: Upload Artifact
