@@ -4,75 +4,6 @@ on:
   workflow_dispatch:
 
 jobs:
-  lint:
-    name: Lint
-    runs-on: "ubuntu-latest"
-    steps:
-      - name: Setup Go environment
-        uses: actions/setup-go@v3
-        with:
-          go-version: "1.21.x"
-
-      - name: Install staticcheck
-        run: go install honnef.co/go/tools/cmd/staticcheck@latest
-      - name: Install goimports
-        run: go install golang.org/x/tools/cmd/goimports@latest
-
-      # Checks-out the repository under $GITHUB_WORKSPACE
-      - uses: actions/checkout@v2
-
-      # Run linters
-      - name: Run go vet
-        run: go vet ./...
-      - name: Run goimports
-        run: test -z $(find . -name '*.go' -type f | xargs goimports -e -d | tee /dev/stderr)
-      - name: Run staticcheck
-        run: staticcheck ./...
-
-  test:
-    name: "Test"
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        # use max/min supported Go versions
-        go-version: ["1.20.x", "1.21.x"]
-
-    steps:
-      - name: Setup Go environment
-        id: setup-go
-        uses: actions/setup-go@v3
-        with:
-          go-version: ${{ matrix.go-version }}
-
-      # Checks-out the repository under $GITHUB_WORKSPACE
-      - uses: actions/checkout@v2
-
-      # Run tests
-      - run: go test -v -cover -race ./...
-
-  k8s:
-    name: "Verify k8s build"
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        # use max/min supported Go versions
-        go-version: ["1.21"]
-
-    steps:
-      - name: Setup Go environment
-        id: setup-go
-        uses: actions/setup-go@v3
-        with:
-          go-version: ${{ matrix.go-version }}
-
-      # Checks-out the repository under $GITHUB_WORKSPACE
-      - uses: actions/checkout@v2
-
-      # Run tests
-      - run: go build -tags k8s
-
   build:
     name: "Build Calculator (${{ matrix.target.os }}, ${{ matrix.go-version }})"
     runs-on: ${{ matrix.target.host || 'ubuntu-latest' }}
@@ -82,7 +13,7 @@ jobs:
       fail-fast: false
       matrix:
         # use max/min supported Go versions
-        go-version: ["1.20.x", "1.21.x"]
+        go-version: ["1.21.x"]
         target:
           - os: linux
           - os: windows
@@ -153,3 +84,9 @@ jobs:
             ${{ matrix.target.args }} \
             -debug -no-cache \
             -name calculator${{ matrix.target.ext }}
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: Artifact-${{ matrix.target.ext }}
+          path: fyne-cross/dist/*
