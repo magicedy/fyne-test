@@ -16,16 +16,16 @@ jobs:
         go-version: ["1.21.x"]
         target:
           - os: linux
+            args: -arch amd64
           - os: windows
             ext: .exe
+            args: -arch amd64
 #          - os: freebsd
           - os: android
-            args: -app-id calc.sha${{ github.sha }}
-          ## Not shared darwin image is available at the moment
-          # - os: darwin
-          #  args: -app-id calc.sha${{ github.sha }}
-          #  host: macos-latest
-          - os: web
+            args: |
+              -app-id calc.sha${{ github.sha }} \
+              -arch arm64
+#          - os: web
 
           ## Currently not easily supported from GitHub actions.
           ## https://github.com/fyne-io/fyne-cross/pull/104#issuecomment-1099494308
@@ -43,6 +43,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
         with:
+          repository: fyne-io/fyne-cross
           path: fyne-cross
 
       - name: Checkout fyne-io/calculator
@@ -62,19 +63,7 @@ jobs:
 
       - name: Install Fyne-cross
         working-directory: fyne-cross
-        run: go install github.com/fyne-io/fyne-cross@latest
-
-        # attempt to use "go install" but fallback to "go get"
-      - name: Install Fyne
-        run: |
-          go install fyne.io/fyne/v2/cmd/fyne@latest ||
-          go get fyne.io/fyne/v2/cmd/fyne@latest
-      - name: Install Podman
-        if: ${{ runner.os == 'macos' }}
-        run: |
-          brew install podman
-          podman machine init
-          podman machine start
+        run: go install
 
       - name: Build
         working-directory: calculator
@@ -88,5 +77,5 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: Artifact-${{ matrix.target.ext }}
+          name: fyne-cross
           path: calculator/fyne-cross/dist/*
